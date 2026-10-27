@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
-inherit autotools git-r3
+inherit autotools flag-o-matic git-r3
 
 DESCRIPTION="Modern graphical system monitor for any panel"
 HOMEPAGE="https://udda.github.io/multiload-ng/"
@@ -37,6 +37,8 @@ REQUIRED_USE="|| ( indicator lxde mate standalone systray xfce )"
 DOCS=( AUTHORS Changelog.md CONTRIBUTING.md README.md )
 
 src_prepare() {
+	sed -i -e 's:libxfce4panel/xfce-panel-plugin.h:libxfce4panel/libxfce4panel.h:' xfce4/plugin.c || die sed
+	sed -i -e '/libxfce4panel\/xfce-panel-macros.h/d' xfce4/plugin.c || die sed
 	eapply "${FILESDIR}/fix-sysfs-nvme-dm.patch"
 	eapply "${FILESDIR}/improve-memory-stats.patch"
 	eapply_user
@@ -44,6 +46,7 @@ src_prepare() {
 }
 
 src_configure() {
+	append-cflags -std=gnu17
 	econf \
 		$(use_enable debug) \
 		$(use_enable autostart) \
